@@ -112,9 +112,10 @@ module SoftDestroyable
     def revive
       transaction do
         cascade_revive
-        update_hash = {:deleted_at => nil, :deleted => false}
-        update_hash[:revive_with_parent] = true if respond_to?(:revive_with_parent)
-        update_attributes(update_hash)
+        self.deleted_at = nil
+        self.deleted = nil
+        self.revive_with_parent = true if respond_to?(:revive_with_parent)
+        save(:validate => false)
       end
     end
 
@@ -150,7 +151,9 @@ module SoftDestroyable
     def soft_destroy
       transaction do
         cascade_soft_destroy
-        update_attributes(:deleted_at => Time.now, :deleted => true)
+        self.deleted_at = Time.now
+        self.deleted = true
+        save(:validate => false)
       end
     end
 
@@ -161,7 +164,7 @@ module SoftDestroyable
             if assoc_obj.deleted? && assoc_obj.respond_to?(:revive_with_parent?)
               # if assoc_obj already deleted, and we are cascading a delete, just update the attribute revive_with_parent to false
               # so we know not to revive this object on a cascade of revive
-              assoc_obj.update_attributes(:revive_with_parent => false)
+              assoc_obj.update_attribute(:revive_with_parent, false)
             else
               assoc_obj.destroy
             end
@@ -258,7 +261,7 @@ module SoftDestroyable
                           reflection.primary_key_name,
                           reflection.dependent_conditions(self, self.class, nil))
         when :has_one
-          association.update_attributes(reflection.primary_key_name => nil)
+          association.update_attribute(reflection.primary_key_name, nil)
         else
       end
 
