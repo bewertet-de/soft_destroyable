@@ -113,7 +113,7 @@ module SoftDestroyable
       transaction do
         cascade_revive
         self.deleted_at = nil
-        self.deleted = nil
+        self.deleted = false
         self.revive_with_parent = true if respond_to?(:revive_with_parent)
         save(:validate => false)
       end
