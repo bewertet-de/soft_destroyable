@@ -47,8 +47,8 @@ module SoftDestroyable
     def soft_destroyable(options = {})
       return if soft_destroyable?
 
-      scope :not_deleted, where(:deleted => false)
-      scope :deleted, where(:deleted => true)
+      scope :not_deleted, -> { where(:deleted => false) }
+      scope :deleted, -> { where(:deleted => true) }
 
       include InstanceMethods
       extend SingletonMethods
